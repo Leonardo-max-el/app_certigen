@@ -1,0 +1,233 @@
+<!-- app_Certigen/templates/certigen/panel_estudiante.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Certificado - UPLA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .header {
+        background: white;
+        padding: 20px 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .logout-btn {
+        padding: 10px 20px;
+        background: #f5f5f5;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .logout-btn:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 50px 40px;
+      }
+
+      .welcome {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .welcome-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .info-card {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .info-value {
+        color: #333;
+        text-align: right;
+      }
+
+      .btn-download {
+        display: block;
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 12px;
+        font-size: 20px;
+        font-weight: 600;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 20px;
+      }
+
+      .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      @media (max-width: 600px) {
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        .container {
+          padding: 40px 30px;
+        }
+
+        .info-row {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .info-value {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo-text">🎓 UPLA Certificados</div>
+      <a href="{% url 'logout_estudiante' %}" class="logout-btn"
+        >Cerrar Sesión</a
+      >
+    </div>
+
+    <div class="container">
+      <div class="welcome">
+        <div class="welcome-icon">👋</div>
+        <h1>¡Bienvenido!</h1>
+        <p style="color: #666">Aquí está la información de tu certificado</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Nombre Completo:</span>
+          <span class="info-value">{{ estudiante.nombre_completo }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">DNI:</span>
+          <span class="info-value">{{ estudiante.dni }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Código:</span>
+          <span class="info-value">{{ estudiante.codigo }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Tipo de Participante:</span>
+          <span class="info-value"
+            >{{ estudiante.get_tipo_participante_display }}</span
+          >
+        </div>
+
+        <div style="text-align: center">
+          {% if tiene_certificado %}
+          <span class="status-badge">✓ Certificado Generado</span>
+          {% else %}
+          <span class="status-badge pending">⏳ Certificado por Generar</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <form method="get" action="{% url 'descargar_certificado' %}">
+        <button type="submit" class="btn-download">
+          📥 Descargar Mi Certificado
+        </button>
+      </form>
+
+      <p
+        style="
+          text-align: center;
+          color: #888;
+          margin-top: 20px;
+          font-size: 14px;
+        "
+      >
+        {% if tiene_certificado %} Tu certificado ya ha sido generado. Al
+        descargar, recibirás el mismo documento. {% else %} Al hacer clic, se
+        generará tu certificado por primera vez. {% endif %}
+      </p>
+    </div>
+  </body>
+</html>

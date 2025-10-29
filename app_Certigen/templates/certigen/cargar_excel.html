@@ -1,0 +1,330 @@
+<!-- app_Certigen/templates/certigen/cargar_excel.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cargar Estudiantes - UPLA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+        min-height: 100vh;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #434343 0%, #000000 100%);
+        color: white;
+        padding: 20px 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-content {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo-text {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .back-btn {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      .card {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 15px;
+      }
+
+      .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 8px;
+      }
+
+      .info-box h3 {
+        color: #1976d2;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .info-box ul {
+        margin-left: 20px;
+        color: #555;
+      }
+
+      .info-box li {
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        color: #555;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 15px;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+      }
+
+      .file-input-label {
+        display: block;
+        padding: 20px;
+        background: #f8f9fa;
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .file-input-label:hover {
+        background: #e9ecef;
+        border-color: #aaa;
+      }
+
+      .file-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      .file-text {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .file-name {
+        margin-top: 15px;
+        padding: 12px;
+        background: #e7f3ff;
+        border-radius: 8px;
+        color: #1976d2;
+        font-weight: 500;
+        display: none;
+      }
+
+      .help-text {
+        color: #888;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #434343 0%, #000000 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .btn-submit:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .messages {
+        margin-bottom: 30px;
+      }
+
+      .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+
+      .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      @media (max-width: 768px) {
+        .header-content {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .card {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-text">📤 Cargar Estudiantes</div>
+        <a href="{% url 'panel_admin' %}" class="back-btn">← Volver al Panel</a>
+      </div>
+    </div>
+
+    <div class="container">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <h1>Carga Masiva de Estudiantes</h1>
+        <p class="subtitle">
+          Sube un archivo Excel con los datos de los estudiantes
+        </p>
+
+        <div class="info-box">
+          <h3>📋 Formato del archivo Excel</h3>
+          <ul>
+            <li><strong>Columna 1:</strong> Nombre Completo</li>
+            <li><strong>Columna 2:</strong> Código de Estudiante</li>
+            <li><strong>Columna 3:</strong> DNI (8 dígitos)</li>
+            <li>
+              <strong>Columna 4:</strong> Tipo de Participante (Ponente,
+              Asistente, Organizador, Sponsor)
+            </li>
+          </ul>
+          <p style="margin-top: 15px; font-size: 13px; color: #666">
+            <strong>Nota:</strong> La primera fila debe contener los encabezados
+            de las columnas.
+          </p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label>Seleccionar archivo Excel</label>
+            <div class="file-input-wrapper">
+              <input
+                type="file"
+                name="archivo_excel"
+                id="archivo_excel"
+                accept=".xlsx,.xls"
+                required
+              />
+              <label for="archivo_excel" class="file-input-label">
+                <div class="file-icon">📊</div>
+                <div class="file-text">
+                  <strong>Haz clic para seleccionar un archivo</strong><br />
+                  <span style="font-size: 12px">o arrastra y suelta aquí</span>
+                </div>
+              </label>
+            </div>
+            <div class="file-name" id="fileName"></div>
+            <p class="help-text">
+              Formatos aceptados: .xlsx, .xls (máximo 5MB)
+            </p>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            Cargar Estudiantes
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById("archivo_excel");
+      const fileName = document.getElementById("fileName");
+      const submitBtn = document.getElementById("submitBtn");
+
+      fileInput.addEventListener("change", function (e) {
+        if (this.files.length > 0) {
+          fileName.textContent = "📄 " + this.files[0].name;
+          fileName.style.display = "block";
+        } else {
+          fileName.style.display = "none";
+        }
+      });
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", function () {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Procesando...";
+        });
+    </script>
+  </body>
+</html>

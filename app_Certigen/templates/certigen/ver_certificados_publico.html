@@ -1,0 +1,205 @@
+<!-- app_Certigen/templates/certigen/ver_certificado_publico.html -->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificado Verificado - UPLA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 50px 40px;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .verified-icon {
+        text-align: center;
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: checkmark 0.5s ease-in-out;
+      }
+
+      @keyframes checkmark {
+        0% {
+          transform: scale(0);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      .info-card {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .info-value {
+        color: #333;
+        text-align: right;
+      }
+
+      .verification-code {
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .code {
+        font-family: "Courier New", monospace;
+        font-size: 16px;
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .btn-download {
+        display: block;
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+      }
+
+      .footer-info {
+        text-align: center;
+        color: #888;
+        margin-top: 25px;
+        font-size: 13px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 40px 30px;
+        }
+
+        .info-row {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .info-value {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="verified-icon">✅</div>
+      <h1>Certificado Verificado</h1>
+      <p class="subtitle">
+        Este certificado es auténtico y ha sido emitido por la UPLA
+      </p>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Nombre:</span>
+          <span class="info-value">{{ estudiante.nombre_completo }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">DNI:</span>
+          <span class="info-value">{{ estudiante.dni }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Participó como:</span>
+          <span class="info-value"
+            >{{ estudiante.get_tipo_participante_display }}</span
+          >
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Fecha de Emisión:</span>
+          <span class="info-value"
+            >{{ certificado.fecha_generacion|date:"d/m/Y" }}</span
+          >
+        </div>
+      </div>
+
+      <div class="verification-code">
+        <p style="color: #666; font-size: 12px; margin-bottom: 8px">
+          Código de Verificación
+        </p>
+        <span class="code">{{ certificado.codigo_unico }}</span>
+      </div>
+
+      <a
+        href="{% url 'descargar_certificado_publico' certificado.codigo_unico %}"
+        class="btn-download"
+      >
+        📥 Descargar Certificado PDF
+      </a>
+
+      <div class="footer-info">
+        <p>Descargado {{ certificado.veces_descargado }} veces</p>
+        <p style="margin-top: 10px">Universidad Peruana Los Andes</p>
+      </div>
+    </div>
+  </body>
+</html>
