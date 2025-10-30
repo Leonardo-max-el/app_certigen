@@ -1,5 +1,4 @@
 [phases.setup]
-# Instala LibreOffice y Java (necesario para LibreOffice)
 aptPkgs = ['libreoffice', 'libreoffice-writer', 'libreoffice-common', 'default-jre-headless']
 
 [phases.install]
@@ -9,4 +8,4 @@ cmds = ['pip install -r requirements.txt']
 cmds = ['python manage.py collectstatic --noinput']
 
 [start]
-cmd = 'python manage.py migrate && gunicorn Admin_Upla.wsgi:application --bind 0.0.0.0:$PORT --timeout 120'
+cmd = 'python manage.py migrate && python manage.py create_admin && gunicorn Admin_Upla.wsgi:application --bind 0.0.0.0:$PORT --timeout 120'
