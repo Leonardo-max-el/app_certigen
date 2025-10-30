@@ -1,6 +1,6 @@
 [phases.setup]
+nixPkgs = ['libreoffice']
 aptPkgs = [
-  'libreoffice',
   'libreoffice-writer',
   'libreoffice-common',
   'default-jre-headless',

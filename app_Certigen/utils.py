@@ -161,6 +161,8 @@ def convertir_word_a_pdf_bytes(docx_path):
     Convierte Word a PDF usando LibreOffice
     Retorna: bytes del PDF
     """
+    import shutil
+    
     output_dir = os.path.dirname(docx_path)
     
     print(f"   → Iniciando conversión con LibreOffice...")
@@ -182,7 +184,6 @@ def convertir_word_a_pdf_bytes(docx_path):
     
     # Define el comando de LibreOffice según el sistema operativo
     if platform.system() == 'Windows':
-        # Busca LibreOffice en las ubicaciones comunes de Windows
         possible_paths = [
             r'C:\Program Files\LibreOffice\program\soffice.exe',
             r'C:\Program Files (x86)\LibreOffice\program\soffice.exe',
@@ -202,13 +203,52 @@ def convertir_word_a_pdf_bytes(docx_path):
         
         print(f"   → Usando: {libreoffice_cmd}")
     else:
-        # En Linux/Railway, usa el comando del sistema
-        libreoffice_cmd = 'libreoffice'
-        print(f"   → Usando: libreoffice (desde PATH del sistema)")
+        # En Linux, busca en múltiples ubicaciones
+        print(f"   → Buscando LibreOffice en el sistema...")
+        
+        # Intenta encontrar con shutil.which primero
+        for cmd in ['soffice', 'libreoffice']:
+            found = shutil.which(cmd)
+            if found:
+                libreoffice_cmd = found
+                print(f"   → LibreOffice encontrado con which: {found}")
+                break
+        else:
+            # Si no se encuentra con which, busca en rutas específicas
+            possible_paths = [
+                '/usr/bin/soffice',
+                '/usr/bin/libreoffice',
+                '/usr/local/bin/soffice',
+                '/usr/local/bin/libreoffice',
+                '/opt/libreoffice/program/soffice'
+            ]
+            
+            libreoffice_cmd = None
+            for path in possible_paths:
+                print(f"   → Verificando: {path}")
+                if os.path.exists(path):
+                    libreoffice_cmd = path
+                    print(f"   → ✓ LibreOffice encontrado en: {path}")
+                    break
+            
+            if not libreoffice_cmd:
+                # Intenta listar lo que hay en /usr/bin
+                print(f"   → Listando archivos relacionados en /usr/bin:")
+                try:
+                    libre_files = [f for f in os.listdir('/usr/bin') if 'libre' in f.lower() or 'soffice' in f.lower()]
+                    print(f"   → Archivos encontrados: {libre_files}")
+                except Exception as e:
+                    print(f"   → Error listando /usr/bin: {e}")
+                
+                raise FileNotFoundError(
+                    "LibreOffice no encontrado en el sistema.\n"
+                    f"Rutas verificadas: {possible_paths}\n"
+                    "Verifica que LibreOffice esté instalado en Railway."
+                )
     
     try:
         # Ejecuta LibreOffice en modo headless
-        print(f"   → Ejecutando conversión...")
+        print(f"   → Ejecutando conversión con: {libreoffice_cmd}")
         
         result = subprocess.run([
             libreoffice_cmd,
@@ -265,8 +305,7 @@ def convertir_word_a_pdf_bytes(docx_path):
         
     except subprocess.TimeoutExpired:
         raise Exception(
-            "La conversión a PDF excedió el tiempo límite (60s).\n"
-            "Puede que haya una instancia de LibreOffice bloqueada."
+            "La conversión a PDF excedió el tiempo límite (60s)."
         )
     except subprocess.CalledProcessError as e:
         raise Exception(
@@ -277,8 +316,6 @@ def convertir_word_a_pdf_bytes(docx_path):
         )
     except FileNotFoundError as e:
         raise Exception(str(e))
-
-
 
 def cargar_estudiantes_desde_excel(archivo_excel):
     """
