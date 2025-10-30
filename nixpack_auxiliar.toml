@@ -1,0 +1,21 @@
+[phases.setup]
+nixPkgs = ['libreoffice']
+aptPkgs = [
+  'libreoffice-writer',
+  'libreoffice-common',
+  'default-jre-headless',
+  'fonts-dejavu-core'
+]
+
+[phases.install]
+cmds = [
+  'pip install -r requirements.txt'
+]
+
+[phases.build]
+cmds = [
+  'python manage.py collectstatic --noinput'
+]
+
+[start]
+cmd = 'python manage.py migrate && python manage.py create_admin && gunicorn Admin_Upla.wsgi:application --bind 0.0.0.0:$PORT --timeout 120'

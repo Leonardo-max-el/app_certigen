@@ -1,7 +1,7 @@
 # Usa una imagen base de Python
 FROM python:3.11-slim
 
-# Instala LibreOffice y dependencias
+# Actualiza e instala LibreOffice y dependencias
 RUN apt-get update && apt-get install -y \
     libreoffice \
     libreoffice-writer \
@@ -10,6 +10,12 @@ RUN apt-get update && apt-get install -y \
     fonts-dejavu-core \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Verifica la instalación de LibreOffice
+RUN which libreoffice && \
+    which soffice && \
+    libreoffice --version && \
+    echo "LibreOffice instalado correctamente"
 
 # Establece el directorio de trabajo
 WORKDIR /app
@@ -29,7 +35,8 @@ RUN python manage.py collectstatic --noinput
 # Expone el puerto
 EXPOSE 8000
 
-# Comando de inicio
-CMD python manage.py migrate && \
-    python manage.py create_admin && \
-    gunicorn Admin_Upla.wsgi:application --bind 0.0.0.0:$PORT --timeout 120
+# Script de entrada
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

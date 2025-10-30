@@ -93,6 +93,7 @@ def generar_certificado_pdf(estudiante):
         # Renderiza la plantilla
         print("→ Renderizando documento...")
         doc.render(context)
+  
         
         # Guarda Word temporal
         with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as docx_file:
