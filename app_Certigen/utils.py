@@ -8,6 +8,28 @@ import tempfile
 from datetime import datetime
 import platform
 import time
+from docx.shared import Pt
+
+
+
+def ajustar_tamaño_nombre(doc, texto_objetivo):
+    longitud = len(texto_objetivo)
+    if longitud <= 20:
+        font_size = 36
+    elif longitud <= 30:
+        font_size = 32
+    elif longitud <= 40:
+        font_size = 28
+    else:
+        font_size = 24
+
+    for paragraph in doc.paragraphs:
+        if texto_objetivo in paragraph.text:
+            for run in paragraph.runs:
+                if texto_objetivo in run.text:
+                    run.font.size = Pt(font_size)
+                    return
+
 
 
 def generar_certificado_pdf(estudiante):
@@ -90,13 +112,17 @@ def generar_certificado_pdf(estudiante):
         
         print(f"→ Datos: {estudiante.nombre_completo} - {estudiante.get_tipo_participante_display()}")
         
-        # Renderiza la plantilla
-        print("→ Renderizando documento...")
-        doc.render(context)
-  
+        
+        
+        
+        
         
         # Guarda Word temporal
         with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as docx_file:
+            # Renderiza la plantilla
+            print("→ Renderizando documento...")
+            doc.render(context)
+            ajustar_tamaño_nombre(doc, estudiante.nombre_completo.upper())
             doc.save(docx_file.name)
             docx_path = docx_file.name
         
