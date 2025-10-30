@@ -3,14 +3,26 @@ import os
 from decouple import config
 
 import dj_database_url
+import platform 
+
+# Configuración de LibreOffice
+if platform.system() == 'Windows':
+    LIBREOFFICE_PATH = r'C:\Program Files\LibreOffice\program\soffice.exe'
+else:
+    LIBREOFFICE_PATH = 'libreoffice'
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-temporal-change-in-production')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+    ALLOWED_HOSTS = ['*']  # Temporal, cambiar en producción
+
+
 
 # URL del sitio para los QR
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
@@ -57,12 +69,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Admin_Upla.wsgi.application'
 
 # Base de datos
-if config('DATABASE_URL', default=None):
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
     # Producción (Railway con PostgreSQL)
     DATABASES = {
         'default': dj_database_url.config(
-            default=config('DATABASE_URL'),
-            conn_max_age=600
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
         )
     }
 else:
@@ -99,5 +114,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuración de sesiones
-SESSION_COOKIE_AGE = 3600  # 1 hora
+SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Seguridad en producción
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False  # Railway maneja SSL
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'

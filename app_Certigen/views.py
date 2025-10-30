@@ -106,13 +106,6 @@ def descargar_certificado_view(request):
         
         messages.error(request, f'Error al generar certificado: {str(e)}')
         return redirect('panel_estudiante')
-        
-    except Exception as e:
-        print(f"ERROR en vista de descarga: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        messages.error(request, f'Error al generar certificado: {str(e)}')
-        return redirect('panel_estudiante')
 
 
 def logout_estudiante_view(request):

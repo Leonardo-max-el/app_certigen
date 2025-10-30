@@ -3,10 +3,12 @@ import qrcode
 import subprocess
 from docxtpl import DocxTemplate, InlineImage
 from docx.shared import Mm
-from io import BytesIO
 from django.conf import settings
 import tempfile
 from datetime import datetime
+import platform
+import time
+
 
 def generar_certificado_pdf(estudiante):
     """
@@ -162,13 +164,43 @@ def convertir_word_a_pdf_bytes(docx_path):
     output_dir = os.path.dirname(docx_path)
     
     print(f"   → Iniciando conversión con LibreOffice...")
+    print(f"   → Sistema operativo: {platform.system()}")
     print(f"   → Archivo de entrada: {docx_path}")
     print(f"   → Directorio de salida: {output_dir}")
     
+    # En Windows, cierra cualquier instancia previa de LibreOffice
+    if platform.system() == 'Windows':
+        print(f"   → Cerrando instancias previas de LibreOffice...")
+        try:
+            subprocess.run(['taskkill', '/F', '/IM', 'soffice.exe'], 
+                          capture_output=True, timeout=3)
+            subprocess.run(['taskkill', '/F', '/IM', 'soffice.bin'], 
+                          capture_output=True, timeout=3)
+            time.sleep(1)  # Espera a que se cierren completamente
+        except:
+            pass
+    
+    # Define el comando de LibreOffice
+    if platform.system() == 'Windows':
+        # USA LA RUTA COMPLETA DIRECTAMENTE
+        libreoffice_cmd = r'C:\Program Files\LibreOffice\program\soffice.exe'
+        
+        if not os.path.exists(libreoffice_cmd):
+            raise FileNotFoundError(
+                f"LibreOffice no encontrado en: {libreoffice_cmd}\n"
+                "Verifica que LibreOffice esté instalado correctamente."
+            )
+        
+        print(f"   → Usando: {libreoffice_cmd}")
+    else:
+        libreoffice_cmd = 'libreoffice'
+    
     try:
         # Ejecuta LibreOffice en modo headless
+        print(f"   → Ejecutando conversión...")
+        
         result = subprocess.run([
-            'libreoffice',
+            libreoffice_cmd,
             '--headless',
             '--convert-to',
             'pdf',
@@ -177,20 +209,41 @@ def convertir_word_a_pdf_bytes(docx_path):
             docx_path
         ], capture_output=True, text=True, timeout=60, check=True)
         
-        print(f"   → LibreOffice stdout: {result.stdout}")
+        print(f"   → Comando ejecutado correctamente")
+        
+        if result.stdout:
+            print(f"   → Output: {result.stdout.strip()}")
+        if result.stderr:
+            print(f"   → Stderr: {result.stderr.strip()}")
         
         # El PDF tiene el mismo nombre pero con extensión .pdf
         pdf_path = docx_path.replace('.docx', '.pdf')
         
         print(f"   → Buscando PDF en: {pdf_path}")
         
-        if not os.path.exists(pdf_path):
-            raise Exception(f"PDF no fue generado. Output: {result.stdout}, Error: {result.stderr}")
+        # Espera a que el archivo esté disponible (máximo 10 segundos)
+        for i in range(20):
+            if os.path.exists(pdf_path):
+                print(f"   → PDF encontrado en intento {i+1}")
+                break
+            time.sleep(0.5)
+        else:
+            # Si no se encontró después de 10 segundos
+            raise Exception(
+                f"PDF no fue generado después de 10 segundos.\n"
+                f"Output: {result.stdout}\n"
+                f"Error: {result.stderr}\n"
+                f"Ruta esperada: {pdf_path}"
+            )
         
         pdf_size = os.path.getsize(pdf_path)
         print(f"   → PDF encontrado, tamaño: {pdf_size} bytes")
         
+        if pdf_size == 0:
+            raise Exception("El PDF generado está vacío")
+        
         # Lee el PDF
+        print(f"   → Leyendo PDF...")
         with open(pdf_path, 'rb') as pdf_file:
             pdf_bytes = pdf_file.read()
         
@@ -201,14 +254,20 @@ def convertir_word_a_pdf_bytes(docx_path):
         return pdf_bytes
         
     except subprocess.TimeoutExpired:
-        raise Exception("La conversión a PDF excedió el tiempo límite (60s)")
-    except subprocess.CalledProcessError as e:
-        raise Exception(f"Error en LibreOffice: {e.stderr}")
-    except FileNotFoundError:
         raise Exception(
-            "LibreOffice no está instalado o no está en el PATH del sistema. "
-            "Instálalo desde: https://www.libreoffice.org/download/download/"
+            "La conversión a PDF excedió el tiempo límite (60s).\n"
+            "Puede que haya una instancia de LibreOffice bloqueada. "
+            "Intenta cerrarla desde el Administrador de tareas."
         )
+    except subprocess.CalledProcessError as e:
+        raise Exception(
+            f"Error ejecutando LibreOffice:\n"
+            f"Código de salida: {e.returncode}\n"
+            f"Stderr: {e.stderr}\n"
+            f"Stdout: {e.stdout}"
+        )
+    except FileNotFoundError as e:
+        raise Exception(str(e))
 
 def cargar_estudiantes_desde_excel(archivo_excel):
     """
