@@ -176,24 +176,35 @@ def convertir_word_a_pdf_bytes(docx_path):
                           capture_output=True, timeout=3)
             subprocess.run(['taskkill', '/F', '/IM', 'soffice.bin'], 
                           capture_output=True, timeout=3)
-            time.sleep(1)  # Espera a que se cierren completamente
+            time.sleep(1)
         except:
             pass
     
-    # Define el comando de LibreOffice
+    # Define el comando de LibreOffice según el sistema operativo
     if platform.system() == 'Windows':
-        # USA LA RUTA COMPLETA DIRECTAMENTE
-        libreoffice_cmd = r'C:\Program Files\LibreOffice\program\soffice.exe'
+        # Busca LibreOffice en las ubicaciones comunes de Windows
+        possible_paths = [
+            r'C:\Program Files\LibreOffice\program\soffice.exe',
+            r'C:\Program Files (x86)\LibreOffice\program\soffice.exe',
+        ]
         
-        if not os.path.exists(libreoffice_cmd):
+        libreoffice_cmd = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                libreoffice_cmd = path
+                break
+        
+        if not libreoffice_cmd:
             raise FileNotFoundError(
-                f"LibreOffice no encontrado en: {libreoffice_cmd}\n"
+                "LibreOffice no encontrado en las ubicaciones estándar de Windows.\n"
                 "Verifica que LibreOffice esté instalado correctamente."
             )
         
         print(f"   → Usando: {libreoffice_cmd}")
     else:
+        # En Linux/Railway, usa el comando del sistema
         libreoffice_cmd = 'libreoffice'
+        print(f"   → Usando: libreoffice (desde PATH del sistema)")
     
     try:
         # Ejecuta LibreOffice en modo headless
@@ -228,7 +239,6 @@ def convertir_word_a_pdf_bytes(docx_path):
                 break
             time.sleep(0.5)
         else:
-            # Si no se encontró después de 10 segundos
             raise Exception(
                 f"PDF no fue generado después de 10 segundos.\n"
                 f"Output: {result.stdout}\n"
@@ -256,8 +266,7 @@ def convertir_word_a_pdf_bytes(docx_path):
     except subprocess.TimeoutExpired:
         raise Exception(
             "La conversión a PDF excedió el tiempo límite (60s).\n"
-            "Puede que haya una instancia de LibreOffice bloqueada. "
-            "Intenta cerrarla desde el Administrador de tareas."
+            "Puede que haya una instancia de LibreOffice bloqueada."
         )
     except subprocess.CalledProcessError as e:
         raise Exception(
@@ -268,6 +277,8 @@ def convertir_word_a_pdf_bytes(docx_path):
         )
     except FileNotFoundError as e:
         raise Exception(str(e))
+
+
 
 def cargar_estudiantes_desde_excel(archivo_excel):
     """
