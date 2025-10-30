@@ -18,10 +18,21 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-temporal-change-in-pr
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
-    ALLOWED_HOSTS = ['*']  # Temporal, cambiar en producción
+# 1. PERMITIR el dominio para que Django acepte peticiones
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'appcertigen-production.up.railway.app',  # Tu dominio específico
+    '.up.railway.app',                        # Permite cualquier otro subdominio de Railway
+]
 
+
+# 2. CONFIAR en el origen para que la verificación CSRF funcione
+# ¡Es crucial que uses 'https://' aquí!
+CSRF_TRUSTED_ORIGINS = [
+    'https://appcertigen-production.up.railway.app', # Tu dominio específico
+    'https://*.up.railway.app',                      # Permite todos los subdominios de Railway
+]
 
 
 # URL del sitio para los QR
